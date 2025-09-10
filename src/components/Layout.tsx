@@ -52,13 +52,13 @@ export default function Layout() {
                 </div>
               </div>
               
-              {/* <Link
+              <Link
                 to="/admin/login"
                 className="flex items-center space-x-1 px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-purple-600 hover:bg-purple-50 transition-colors"
               >
                 <Settings className="h-4 w-4" />
                 <span>Admin</span>
-              </Link> */}
+              </Link>
             </div>
           </div>
         </div>

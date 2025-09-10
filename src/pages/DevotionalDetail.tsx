@@ -6,6 +6,10 @@ import { getCanonicalUrl } from '../utils/slug';
 import ShareCard from '../components/ShareCard';
 import { format } from 'date-fns';
 import { Calendar, User, Book } from 'lucide-react';
+import InteractiveElements from '../components/InteractiveElements';
+import PrayerRequestForm from '../components/PrayerRequestForm';
+import CounselRequestForm from '../components/CounselRequestForm';
+import QuestionForm from '../components/QuestionForm';
 
 export default function DevotionalDetail() {
   const { slug } = useParams<{ slug: string }>();
@@ -181,6 +185,50 @@ export default function DevotionalDetail() {
               </div>
             </div>
           </article>
+
+          {/* Interactive Elements */}
+          <div className={`rounded-2xl shadow-xl p-8 ${
+            section === 'children'
+              ? 'bg-white'
+              : 'bg-gray-900 border border-purple-500/20'
+          }`}>
+            <InteractiveElements 
+              section={section}
+              scripture={devotional.scripture}
+              title={devotional.title}
+            />
+          </div>
+
+          {/* Prayer Request Form */}
+          <div className={`rounded-2xl shadow-xl p-8 ${
+            section === 'children'
+              ? 'bg-white'
+              : 'bg-gray-900 border border-purple-500/20'
+          }`}>
+            <PrayerRequestForm section={section} />
+          </div>
+
+          {/* Counsel Request Form */}
+          <div className={`rounded-2xl shadow-xl p-8 ${
+            section === 'children'
+              ? 'bg-white'
+              : 'bg-gray-900 border border-purple-500/20'
+          }`}>
+            <CounselRequestForm section={section} />
+          </div>
+
+          {/* Question Form */}
+          <div className={`rounded-2xl shadow-xl p-8 ${
+            section === 'children'
+              ? 'bg-white'
+              : 'bg-gray-900 border border-purple-500/20'
+          }`}>
+            <QuestionForm 
+              section={section}
+              devotionalId={devotional.id}
+              devotionalTitle={devotional.title}
+            />
+          </div>
 
           {/* Share Section */}
           <div className={`rounded-2xl shadow-xl p-8 ${

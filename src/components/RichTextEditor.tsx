@@ -1,0 +1,171 @@
+import React from 'react';
+import { useEditor, EditorContent } from '@tiptap/react';
+import StarterKit from '@tiptap/starter-kit';
+import { TextStyle } from '@tiptap/extension-text-style';
+import Color from '@tiptap/extension-color';
+import Image from '@tiptap/extension-image';
+import { 
+  Bold, 
+  Italic, 
+  Underline, 
+  Type, 
+  Palette, 
+  Image as ImageIcon,
+  Undo,
+  Redo
+} from 'lucide-react';
+
+interface RichTextEditorProps {
+  content: string;
+  onChange: (content: string) => void;
+  placeholder?: string;
+}
+
+export default function RichTextEditor({ content, onChange, placeholder }: RichTextEditorProps) {
+  const editor = useEditor({
+    extensions: [
+      StarterKit,
+      TextStyle,
+      Color,
+      Image.configure({
+        inline: true,
+        allowBase64: true,
+      }),
+    ],
+    content,
+    onUpdate: ({ editor }) => {
+      onChange(editor.getHTML());
+    },
+    editorProps: {
+      attributes: {
+        class: 'prose prose-lg max-w-none focus:outline-none min-h-[200px] p-4',
+      },
+    },
+  });
+
+  const addImage = () => {
+    const url = window.prompt('Enter image URL:');
+    if (url && editor) {
+      editor.chain().focus().setImage({ src: url }).run();
+    }
+  };
+
+  const setFontSize = (size: string) => {
+    if (editor) {
+      editor.chain().focus().setFontSize(size).run();
+    }
+  };
+
+  const setColor = (color: string) => {
+    if (editor) {
+      editor.chain().focus().setColor(color).run();
+    }
+  };
+
+  if (!editor) {
+    return null;
+  }
+
+  return (
+    <div className="border border-gray-300 rounded-lg overflow-hidden bg-white">
+      {/* Toolbar */}
+      <div className="border-b border-gray-200 p-3 flex flex-wrap gap-2">
+        <div className="flex items-center space-x-1 border-r border-gray-200 pr-2">
+          <button
+            onClick={() => editor.chain().focus().toggleBold().run()}
+            className={`p-2 rounded hover:bg-gray-100 ${
+              editor.isActive('bold') ? 'bg-gray-200' : ''
+            }`}
+            title="Bold"
+          >
+            <Bold className="h-4 w-4 text-gray-700" />
+          </button>
+          <button
+            onClick={() => editor.chain().focus().toggleItalic().run()}
+            className={`p-2 rounded hover:bg-gray-100 ${
+              editor.isActive('italic') ? 'bg-gray-200' : ''
+            }`}
+            title="Italic"
+          >
+            <Italic className="h-4 w-4 text-gray-700" />
+          </button>
+          <button
+            onClick={() => editor.chain().focus().toggleUnderline().run()}
+            className={`p-2 rounded hover:bg-gray-100 ${
+              editor.isActive('underline') ? 'bg-gray-200' : ''
+            }`}
+            title="Underline"
+          >
+            <Underline className="h-4 w-4 text-gray-700" />
+          </button>
+        </div>
+
+        <div className="flex items-center space-x-1 border-r border-gray-200 pr-2">
+        <select
+            onChange={(e) => setFontSize(e.target.value)}
+            className="px-2 py-1 border border-gray-300 rounded text-sm text-gray-800 bg-white"
+            title="Font Size"
+        >
+            <option value="">Size</option>
+            <option value="12px">Small</option>
+            <option value="16px">Normal</option>
+            <option value="20px">Large</option>
+            <option value="24px">X-Large</option>
+        </select>
+        </div>
+
+
+        <div className="flex items-center space-x-1 border-r border-gray-200 pr-2">
+          <div className="flex items-center space-x-1">
+            <Palette className="h-4 w-4 text-gray-600" />
+            <input
+              type="color"
+              onChange={(e) => setColor(e.target.value)}
+              className="w-8 h-8 border border-gray-300 rounded cursor-pointer"
+              title="Text Color"
+            />
+          </div>
+        </div>
+
+        <div className="flex items-center space-x-1 border-r border-gray-200 pr-2">
+          <button
+            onClick={addImage}
+            className="p-2 rounded hover:bg-gray-100"
+            title="Insert Image"
+          >
+            <ImageIcon className="h-4 w-4 text-gray-700" />
+          </button>
+        </div>
+
+        <div className="flex items-center space-x-1">
+          <button
+            onClick={() => editor.chain().focus().undo().run()}
+            disabled={!editor.can().undo()}
+            className="p-2 rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+            title="Undo"
+          >
+            <Undo className="h-4 w-4 text-gray-700" />
+          </button>
+          <button
+            onClick={() => editor.chain().focus().redo().run()}
+            disabled={!editor.can().redo()}
+            className="p-2 rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+            title="Redo"
+          >
+            <Redo className="h-4 w-4 text-gray-700" />
+          </button>
+        </div>
+      </div>
+
+      {/* Editor */}
+      <div className="min-h-[200px] max-h-[400px] overflow-y-auto">
+        <EditorContent 
+        editor={editor} 
+        placeholder={placeholder}
+        className="text-gray-800 bg-white p-4 rounded"
+        />
+
+      </div>
+    </div>
+  );
+}

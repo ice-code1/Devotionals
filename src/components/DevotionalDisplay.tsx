@@ -3,6 +3,10 @@ import { format } from 'date-fns';
 import { Devotional } from '../lib/supabase';
 import { getCanonicalUrl } from '../utils/slug';
 import ShareCard from './ShareCard';
+import InteractiveElements from './InteractiveElements';
+import PrayerRequestForm from './PrayerRequestForm';
+import CounselRequestForm from './CounselRequestForm';
+import QuestionForm from './QuestionForm';
 
 interface DevotionalDisplayProps {
   devotional: Devotional | null;
@@ -73,17 +77,15 @@ export default function DevotionalDisplay({ devotional, section }: DevotionalDis
           </div>
 
           {/* Body */}
-          <div className={`prose prose-lg max-w-none mb-8 ${
-            section === 'children'
-              ? 'text-gray-700'
-              : 'text-gray-300 prose-invert'
-          }`}>
-            {devotional.body.split('\n').map((paragraph, index) => (
-              <p key={index} className="mb-4 leading-relaxed">
-                {paragraph}
-              </p>
-            ))}
-          </div>
+          <div
+            className={`prose prose-lg max-w-none mb-8 ${
+              section === 'children'
+                ? 'text-gray-700'
+                : 'text-gray-300 prose-invert'
+            } prose-img:rounded-xl prose-img:shadow-lg prose-img:mx-auto prose-img:max-h-96`}
+            dangerouslySetInnerHTML={{ __html: devotional.body }}
+          />
+
 
           {/* Author */}
           <div className="flex items-center space-x-4 pt-6 border-t border-gray-200">
@@ -105,6 +107,50 @@ export default function DevotionalDisplay({ devotional, section }: DevotionalDis
               </div>
             </div>
           </div>
+        </div>
+
+        {/* Interactive Elements */}
+        <div className={`rounded-2xl shadow-xl p-8 ${
+          section === 'children'
+            ? 'bg-white'
+            : 'bg-gray-900 border border-purple-500/20'
+        }`}>
+          <InteractiveElements 
+            section={section}
+            scripture={devotional.scripture}
+            title={devotional.title}
+          />
+        </div>
+
+        {/* Prayer Request Form */}
+        <div className={`rounded-2xl shadow-xl p-8 ${
+          section === 'children'
+            ? 'bg-white'
+            : 'bg-gray-900 border border-purple-500/20'
+        }`}>
+          <PrayerRequestForm section={section} />
+        </div>
+
+        {/* Counsel Request Form */}
+        <div className={`rounded-2xl shadow-xl p-8 ${
+          section === 'children'
+            ? 'bg-white'
+            : 'bg-gray-900 border border-purple-500/20'
+        }`}>
+          <CounselRequestForm section={section} />
+        </div>
+
+        {/* Question Form */}
+        <div className={`rounded-2xl shadow-xl p-8 ${
+          section === 'children'
+            ? 'bg-white'
+            : 'bg-gray-900 border border-purple-500/20'
+        }`}>
+          <QuestionForm 
+            section={section}
+            devotionalId={devotional.id}
+            devotionalTitle={devotional.title}
+          />
         </div>
 
         {/* Share Section */}

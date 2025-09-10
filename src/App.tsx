@@ -9,6 +9,8 @@ import Archive from './pages/Archive';
 import DevotionalDetail from './pages/DevotionalDetail';
 import AdminLogin from './pages/admin/Login';
 import AdminDashboard from './pages/admin/Dashboard';
+import WriterDashboard from './pages/writer/Dashboard';
+import ReviewDevotional from './pages/ReviewDevotional';
 
 function App() {
   return (
@@ -23,6 +25,8 @@ function App() {
             <Route path="devotional/:slug" element={<DevotionalDetail />} />
             <Route path="admin/login" element={<AdminLogin />} />
             <Route path="admin/dashboard" element={<AdminDashboard />} />
+            <Route path="writer/dashboard" element={<WriterDashboard />} />
+            <Route path="review/:reviewLink" element={<ReviewDevotional />} />
           </Route>
         </Routes>
       </Router>

@@ -14,11 +14,19 @@ import {
   Calendar,
   User,
   Save,
-  Eye
+  Eye,
+  Download,
+  Search,
+  Filter,
+  CheckCircle,
+  XCircle,
+  Clock
 } from 'lucide-react';
 import ShareCard from '../../components/ShareCard';
+import * as XLSX from 'xlsx';
+import { saveAs } from 'file-saver';
 
-type TabType = 'devotionals' | 'moderator-cards';
+type TabType = 'devotionals' | 'moderator-cards' | 'submissions' | 'data';
 
 export default function AdminDashboard() {
   const { user, signOut, loading } = useAuth();
@@ -26,6 +34,10 @@ export default function AdminDashboard() {
   const [recentDevotionals, setRecentDevotionals] = useState<Devotional[]>([]);
   const [recentModeratorCards, setRecentModeratorCards] = useState<ModeratorCard[]>([]);
   const [existingSlugs, setExistingSlugs] = useState<string[]>([]);
+  const [submissions, setSubmissions] = useState<any[]>([]);
+  const [prayerRequests, setPrayerRequests] = useState<any[]>([]);
+  const [counselRequests, setCounselRequests] = useState<any[]>([]);
+  const [questions, setQuestions] = useState<any[]>([]);
   
   // Devotional form state
   const [devotionalForm, setDevotionalForm] = useState({
@@ -53,6 +65,8 @@ export default function AdminDashboard() {
     if (user) {
       fetchRecentData();
       fetchExistingSlugs();
+      fetchSubmissions();
+      fetchUserData();
     }
   }, [user]);
 
@@ -81,6 +95,54 @@ export default function AdminDashboard() {
       }
     } catch (error) {
       console.error('Error fetching recent data:', error);
+    }
+  };
+
+  const fetchSubmissions = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('devotional_submissions')
+        .select(`
+          *,
+          writer:writers(name, profile_image)
+        `)
+        .order('submitted_at', { ascending: false });
+
+      if (error) throw error;
+      setSubmissions(data || []);
+    } catch (error) {
+      console.error('Error fetching submissions:', error);
+    }
+  };
+
+  const fetchUserData = async () => {
+    try {
+      // Fetch prayer requests
+      const { data: prayerData } = await supabase
+        .from('prayer_requests')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      // Fetch counsel requests
+      const { data: counselData } = await supabase
+        .from('counsel_requests')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      // Fetch questions
+      const { data: questionData } = await supabase
+        .from('devotional_questions')
+        .select(`
+          *,
+          devotional:devotionals(title)
+        `)
+        .order('created_at', { ascending: false });
+
+      setPrayerRequests(prayerData || []);
+      setCounselRequests(counselData || []);
+      setQuestions(questionData || []);
+    } catch (error) {
+      console.error('Error fetching user data:', error);
     }
   };
 
@@ -174,6 +236,69 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleSubmissionAction = async (submissionId: string, action: 'approve' | 'reject', notes?: string) => {
+    try {
+      if (action === 'approve') {
+        // Get submission details
+        const submission = submissions.find(s => s.id === submissionId);
+        if (!submission) return;
+
+        // Create devotional from submission
+        const baseSlug = generateSlug(submission.title, format(new Date(), 'yyyy-MM-dd'));
+        const uniqueSlug = createUniqueSlug(baseSlug, existingSlugs);
+
+        const { error: devotionalError } = await supabase
+          .from('devotionals')
+          .insert([{
+            section: submission.section,
+            title: submission.title,
+            body: submission.body,
+            scripture: submission.scripture,
+            authorName: submission.writer.name,
+            authorImage: submission.writer.profile_image || 'https://images.pexels.com/photos/1181690/pexels-photo-1181690.jpeg?auto=compress&cs=tinysrgb&w=400',
+            date: format(new Date(), 'yyyy-MM-dd'),
+            slug: uniqueSlug,
+          }]);
+
+        if (devotionalError) throw devotionalError;
+        setExistingSlugs(prev => [...prev, uniqueSlug]);
+      }
+
+      // Update submission status
+      const { error } = await supabase
+        .from('devotional_submissions')
+        .update({
+          status: action === 'approve' ? 'approved' : 'rejected',
+          reviewed_at: new Date().toISOString(),
+          reviewed_by: user?.id,
+          admin_notes: notes
+        })
+        .eq('id', submissionId);
+
+      if (error) throw error;
+
+      // Refresh data
+      fetchSubmissions();
+      if (action === 'approve') {
+        fetchRecentData();
+      }
+
+      alert(`Submission ${action}d successfully!`);
+    } catch (error) {
+      console.error(`Error ${action}ing submission:`, error);
+      alert(`Error ${action}ing submission. Please try again.`);
+    }
+  };
+
+  const exportToExcel = (data: any[], filename: string) => {
+    const worksheet = XLSX.utils.json_to_sheet(data);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Data');
+    
+    const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+    const blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    saveAs(blob, `${filename}-${format(new Date(), 'yyyy-MM-dd')}.xlsx`);
+  };
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
     alert('Copied to clipboard!');
@@ -242,6 +367,28 @@ export default function AdminDashboard() {
           >
             <Users className="h-5 w-5" />
             <span>Moderator Cards</span>
+          </button>
+          <button
+            onClick={() => setActiveTab('submissions')}
+            className={`flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-colors ${
+              activeTab === 'submissions'
+                ? 'bg-purple-600 text-white'
+                : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+            }`}
+          >
+            <Eye className="h-5 w-5" />
+            <span>Submissions</span>
+          </button>
+          <button
+            onClick={() => setActiveTab('data')}
+            className={`flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-colors ${
+              activeTab === 'data'
+                ? 'bg-purple-600 text-white'
+                : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+            }`}
+          >
+            <Download className="h-5 w-5" />
+            <span>User Data</span>
           </button>
         </div>
 
@@ -448,6 +595,242 @@ export default function AdminDashboard() {
           </div>
         )}
 
+        {activeTab === 'submissions' && (
+          <div className="bg-gray-800 rounded-2xl p-6">
+            <h2 className="text-2xl font-bold mb-6 flex items-center space-x-2">
+              <Eye className="h-6 w-6 text-blue-400" />
+              <span>Devotional Submissions</span>
+            </h2>
+
+            <div className="space-y-4">
+              {submissions.length === 0 ? (
+                <div className="text-center p-8 text-gray-400">
+                  <Book className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                  <p>No submissions yet.</p>
+                </div>
+              ) : (
+                submissions.map((submission) => (
+                  <div key={submission.id} className="bg-gray-700 rounded-lg p-6">
+                    <div className="flex justify-between items-start mb-4">
+                      <div>
+                        <h3 className="text-xl font-bold text-white mb-2">{submission.title}</h3>
+                        <div className="flex items-center space-x-4 text-sm text-gray-400">
+                          <span className="capitalize">{submission.section}</span>
+                          <span>{format(new Date(submission.submitted_at), 'MMM dd, yyyy')}</span>
+                          <div className="flex items-center space-x-2">
+                            {submission.writer?.profile_image && (
+                              <img
+                                src={submission.writer.profile_image}
+                                alt={submission.writer.name}
+                                className="w-6 h-6 rounded-full"
+                              />
+                            )}
+                            <span>{submission.writer?.name}</span>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        {submission.status === 'pending' && (
+                          <div className="flex items-center space-x-1 text-yellow-400">
+                            <Clock className="h-4 w-4" />
+                            <span className="text-sm">Pending</span>
+                          </div>
+                        )}
+                        {submission.status === 'approved' && (
+                          <div className="flex items-center space-x-1 text-green-400">
+                            <CheckCircle className="h-4 w-4" />
+                            <span className="text-sm">Approved</span>
+                          </div>
+                        )}
+                        {submission.status === 'rejected' && (
+                          <div className="flex items-center space-x-1 text-red-400">
+                            <XCircle className="h-4 w-4" />
+                            <span className="text-sm">Rejected</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="mb-4">
+                      <div className="text-sm text-gray-300 mb-2">Scripture:</div>
+                      <div className="text-purple-300 italic">"{submission.scripture}"</div>
+                    </div>
+
+                    <div className="mb-4">
+                      <div className="text-sm text-gray-300 mb-2">Content Preview:</div>
+                      <div 
+                        className="text-gray-400 text-sm line-clamp-3"
+                        dangerouslySetInnerHTML={{ __html: submission.body.substring(0, 200) + '...' }}
+                      />
+                    </div>
+
+                    {submission.status === 'pending' && (
+                      <div className="flex items-center space-x-3 pt-4 border-t border-gray-600">
+                        <button
+                          onClick={() => {
+                            const notes = prompt('Add admin notes (optional):');
+                            handleSubmissionAction(submission.id, 'approve', notes || undefined);
+                          }}
+                          className="flex items-center space-x-2 px-4 py-2 bg-green-600 hover:bg-green-700 rounded-lg text-sm font-medium"
+                        >
+                          <CheckCircle className="h-4 w-4" />
+                          <span>Approve & Post</span>
+                        </button>
+                        <button
+                          onClick={() => {
+                            const notes = prompt('Reason for rejection:');
+                            if (notes) {
+                              handleSubmissionAction(submission.id, 'reject', notes);
+                            }
+                          }}
+                          className="flex items-center space-x-2 px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg text-sm font-medium"
+                        >
+                          <XCircle className="h-4 w-4" />
+                          <span>Reject</span>
+                        </button>
+                        <a
+                          href={`/review/${submission.review_link}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center space-x-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-sm font-medium"
+                        >
+                          <ExternalLink className="h-4 w-4" />
+                          <span>Preview</span>
+                        </a>
+                      </div>
+                    )}
+
+                    {submission.admin_notes && (
+                      <div className="mt-4 p-3 bg-gray-600 rounded">
+                        <div className="text-sm font-medium text-gray-300 mb-1">Admin Notes:</div>
+                        <div className="text-sm text-gray-400">{submission.admin_notes}</div>
+                      </div>
+                    )}
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'data' && (
+          <div className="space-y-8">
+            {/* Prayer Requests */}
+            <div className="bg-gray-800 rounded-2xl p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-xl font-bold">Prayer Requests ({prayerRequests.length})</h3>
+                <button
+                  onClick={() => exportToExcel(prayerRequests, 'prayer-requests')}
+                  className="flex items-center space-x-2 px-4 py-2 bg-green-600 hover:bg-green-700 rounded-lg text-sm font-medium"
+                >
+                  <Download className="h-4 w-4" />
+                  <span>Export Excel</span>
+                </button>
+              </div>
+              
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-gray-700">
+                      <th className="text-left p-3">Name</th>
+                      <th className="text-left p-3">Location</th>
+                      <th className="text-left p-3">Phone</th>
+                      <th className="text-left p-3">Request</th>
+                      <th className="text-left p-3">Date</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {prayerRequests.slice(0, 10).map((request) => (
+                      <tr key={request.id} className="border-b border-gray-700">
+                        <td className="p-3">{request.name}</td>
+                        <td className="p-3">{request.location}</td>
+                        <td className="p-3">{request.phone}</td>
+                        <td className="p-3 max-w-xs truncate">{request.prayer_request}</td>
+                        <td className="p-3">{format(new Date(request.created_at), 'MMM dd, yyyy')}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {/* Counsel Requests */}
+            <div className="bg-gray-800 rounded-2xl p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-xl font-bold">Counsel Requests ({counselRequests.length})</h3>
+                <button
+                  onClick={() => exportToExcel(counselRequests, 'counsel-requests')}
+                  className="flex items-center space-x-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-sm font-medium"
+                >
+                  <Download className="h-4 w-4" />
+                  <span>Export Excel</span>
+                </button>
+              </div>
+              
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-gray-700">
+                      <th className="text-left p-3">Name</th>
+                      <th className="text-left p-3">Phone</th>
+                      <th className="text-left p-3">Problem</th>
+                      <th className="text-left p-3">Date</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {counselRequests.slice(0, 10).map((request) => (
+                      <tr key={request.id} className="border-b border-gray-700">
+                        <td className="p-3">{request.name}</td>
+                        <td className="p-3">{request.phone}</td>
+                        <td className="p-3 max-w-xs truncate">{request.problem_statement}</td>
+                        <td className="p-3">{format(new Date(request.created_at), 'MMM dd, yyyy')}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {/* Questions */}
+            <div className="bg-gray-800 rounded-2xl p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-xl font-bold">Devotional Questions ({questions.length})</h3>
+                <button
+                  onClick={() => exportToExcel(questions, 'devotional-questions')}
+                  className="flex items-center space-x-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg text-sm font-medium"
+                >
+                  <Download className="h-4 w-4" />
+                  <span>Export Excel</span>
+                </button>
+              </div>
+              
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-gray-700">
+                      <th className="text-left p-3">Name</th>
+                      <th className="text-left p-3">Contact</th>
+                      <th className="text-left p-3">Devotional</th>
+                      <th className="text-left p-3">Question</th>
+                      <th className="text-left p-3">Date</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {questions.slice(0, 10).map((question) => (
+                      <tr key={question.id} className="border-b border-gray-700">
+                        <td className="p-3">{question.name}</td>
+                        <td className="p-3">{question.contact}</td>
+                        <td className="p-3 max-w-xs truncate">{question.devotional?.title}</td>
+                        <td className="p-3 max-w-xs truncate">{question.question}</td>
+                        <td className="p-3">{format(new Date(question.created_at), 'MMM dd, yyyy')}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        )}
         {activeTab === 'moderator-cards' && (
           <div className="grid lg:grid-cols-2 gap-8">
             {/* Add Moderator Card Form */}
