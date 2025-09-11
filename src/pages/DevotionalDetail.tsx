@@ -169,17 +169,15 @@ export default function DevotionalDetail() {
             </div>
 
             {/* Body */}
-            <div className={`prose prose-lg max-w-none mb-8 ${
-              section === 'children'
-                ? 'text-gray-700'
-                : 'text-gray-300 prose-invert'
-            }`}>
-              {devotional.body.split('\n').map((paragraph, index) => (
-                <p key={index} className="mb-4 leading-relaxed">
-                  {paragraph}
-                </p>
-              ))}
-            </div>
+            <div
+              className={`prose prose-lg max-w-none mb-8 ${
+                section === 'children'
+                  ? 'text-gray-700'
+                  : 'text-gray-300 prose-invert'
+              }`}
+              dangerouslySetInnerHTML={{ __html: devotional.body }}
+            />
+
 
             {/* Author */}
             <div className={`flex items-center space-x-4 pt-6 border-t ${
