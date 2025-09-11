@@ -1,6 +1,6 @@
 import React from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
-import { Heart, Home, Archive, Settings } from 'lucide-react';
+import { Heart, Home, Archive, Settings, Star } from 'lucide-react';
 
 export default function Layout() {
   const location = useLocation();
@@ -27,6 +27,14 @@ export default function Layout() {
               >
                 <Home className="h-4 w-4" />
                 <span>Home</span>
+              </Link>
+              
+              <Link
+                to="/favorites"
+                className="flex items-center space-x-1 px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-purple-600 hover:bg-purple-50 transition-colors"
+              >
+                <Star className="h-4 w-4" />
+                <span>Favorites</span>
               </Link>
               
               <div className="relative group">

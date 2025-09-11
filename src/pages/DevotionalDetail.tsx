@@ -4,12 +4,16 @@ import { Helmet } from 'react-helmet-async';
 import { supabase, Devotional } from '../lib/supabase';
 import { getCanonicalUrl } from '../utils/slug';
 import ShareCard from '../components/ShareCard';
-import { format } from 'date-fns';
-import { Calendar, User, Book } from 'lucide-react';
 import InteractiveElements from '../components/InteractiveElements';
 import PrayerRequestForm from '../components/PrayerRequestForm';
 import CounselRequestForm from '../components/CounselRequestForm';
 import QuestionForm from '../components/QuestionForm';
+import FavoriteButton from '../components/FavoriteButton';
+import ReadAloudButton from '../components/ReadAloudButton';
+import { format } from 'date-fns';
+import { Calendar, User, Book } from 'lucide-react';
+import DOMPurify from 'dompurify';
+
 
 export default function DevotionalDetail() {
   const { slug } = useParams<{ slug: string }>();
@@ -64,29 +68,12 @@ export default function DevotionalDetail() {
     );
   }
 
-
-    // Utility function
-  function extractShortKeyPoint(html: string): string {
-    if (!html) return '';
-
-    // 1. Remove all <img> tags completely
-    const noImages = html.replace(/<img[^>]*>/g, '');
-
-    // 2. Strip all remaining HTML tags
-    const textOnly = noImages.replace(/<[^>]+>/g, '');
-
-    // 3. Trim and take only the first sentence (up to the first ".")
-    const firstSentence = textOnly.split('.').map(s => s.trim()).filter(Boolean)[0];
-
-    return firstSentence ? firstSentence + '.' : '';
-  }
-
-  // Usage
-  const shortKeyPoint = extractShortKeyPoint(devotional.body);
-
   const canonicalUrl = getCanonicalUrl(devotional.slug);
-
+  const plainTextBody = DOMPurify.sanitize(devotional.body, { ALLOWED_TAGS: [] });
+  const shortKeyPoint = plainTextBody.split('.')[0] + '.';
   const section = devotional.section;
+  const fullText = `${devotional.title}. ${devotional.scripture}. ${plainTextBody}`;
+
 
   return (
     <>
@@ -153,6 +140,12 @@ export default function DevotionalDetail() {
               }`}>
                 {devotional.title}
               </h1>
+              
+              {/* Action Buttons */}
+              <div className="flex flex-wrap justify-center gap-4 mt-6">
+                <FavoriteButton devotional={devotional} section={section} />
+                <ReadAloudButton text={fullText} section={section} />
+              </div>
             </header>
 
             {/* Scripture */}
@@ -204,48 +197,21 @@ export default function DevotionalDetail() {
             </div>
           </article>
 
-          {/* Interactive Elements */}
-          <div className={`rounded-2xl shadow-xl p-8 ${
-            section === 'children'
-              ? 'bg-white'
-              : 'bg-gray-900 border border-purple-500/20'
-          }`}>
-            <InteractiveElements 
-              section={section}
-              scripture={devotional.scripture}
-              title={devotional.title}
-            />
-          </div>
+          {/* Interactive Games */}
+          <InteractiveElements
+            devotional={{
+              title: devotional.title,
+              scripture: devotional.scripture,
+              content: devotional.body
+            }}
+            section={section}
+          />
 
-          {/* Prayer Request Form */}
-          <div className={`rounded-2xl shadow-xl p-8 ${
-            section === 'children'
-              ? 'bg-white'
-              : 'bg-gray-900 border border-purple-500/20'
-          }`}>
+          {/* Interactive Forms */}
+          <div className="grid md:grid-cols-3 gap-6">
             <PrayerRequestForm section={section} />
-          </div>
-
-          {/* Counsel Request Form */}
-          <div className={`rounded-2xl shadow-xl p-8 ${
-            section === 'children'
-              ? 'bg-white'
-              : 'bg-gray-900 border border-purple-500/20'
-          }`}>
             <CounselRequestForm section={section} />
-          </div>
-
-          {/* Question Form */}
-          <div className={`rounded-2xl shadow-xl p-8 ${
-            section === 'children'
-              ? 'bg-white'
-              : 'bg-gray-900 border border-purple-500/20'
-          }`}>
-            <QuestionForm 
-              section={section}
-              devotionalId={devotional.id}
-              devotionalTitle={devotional.title}
-            />
+            <QuestionForm devotionalId={devotional.id} section={section} />
           </div>
 
           {/* Share Section */}

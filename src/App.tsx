@@ -6,11 +6,10 @@ import Landing from './pages/Landing';
 import Children from './pages/Children';
 import Teenagers from './pages/Teenagers';
 import Archive from './pages/Archive';
+import Favorites from './pages/Favorites';
 import DevotionalDetail from './pages/DevotionalDetail';
 import AdminLogin from './pages/admin/Login';
 import AdminDashboard from './pages/admin/Dashboard';
-import WriterDashboard from './pages/writer/Dashboard';
-import ReviewDevotional from './pages/ReviewDevotional';
 
 function App() {
   return (
@@ -22,11 +21,10 @@ function App() {
             <Route path="children" element={<Children />} />
             <Route path="teenagers" element={<Teenagers />} />
             <Route path="archive/:section" element={<Archive />} />
+            <Route path="favorites" element={<Favorites />} />
             <Route path="devotional/:slug" element={<DevotionalDetail />} />
             <Route path="admin/login" element={<AdminLogin />} />
             <Route path="admin/dashboard" element={<AdminDashboard />} />
-            <Route path="writer/dashboard" element={<WriterDashboard />} />
-            <Route path="review/:reviewLink" element={<ReviewDevotional />} />
           </Route>
         </Routes>
       </Router>

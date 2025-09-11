@@ -7,6 +7,10 @@ import InteractiveElements from './InteractiveElements';
 import PrayerRequestForm from './PrayerRequestForm';
 import CounselRequestForm from './CounselRequestForm';
 import QuestionForm from './QuestionForm';
+import FavoriteButton from './FavoriteButton';
+import ReadAloudButton from './ReadAloudButton';
+import DOMPurify from 'dompurify';
+
 
 interface DevotionalDisplayProps {
   devotional: Devotional | null;
@@ -35,7 +39,10 @@ export default function DevotionalDisplay({ devotional, section }: DevotionalDis
   }
 
   const canonicalUrl = getCanonicalUrl(devotional.slug);
-  const shortKeyPoint = devotional.body.split('.')[0] + '.';
+  const plainTextBody = DOMPurify.sanitize(devotional.body, { ALLOWED_TAGS: [] });
+  const shortKeyPoint = plainTextBody.split('.')[0] + '.';
+  const fullText = `${devotional.title}. ${devotional.scripture}. ${plainTextBody}`;
+
 
   return (
     <div className={`min-h-screen py-8 px-4 ${
@@ -61,6 +68,12 @@ export default function DevotionalDisplay({ devotional, section }: DevotionalDis
             }`}>
               {devotional.title}
             </h1>
+            
+            {/* Action Buttons */}
+            <div className="flex flex-wrap justify-center gap-4 mt-6">
+              <FavoriteButton devotional={devotional} section={section} />
+              <ReadAloudButton text={fullText} section={section} />
+            </div>
           </header>
 
           {/* Scripture */}
@@ -82,7 +95,7 @@ export default function DevotionalDisplay({ devotional, section }: DevotionalDis
               section === 'children'
                 ? 'text-gray-700'
                 : 'text-gray-300 prose-invert'
-            } prose-img:rounded-xl prose-img:shadow-lg prose-img:mx-auto prose-img:max-h-96`}
+            }`}
             dangerouslySetInnerHTML={{ __html: devotional.body }}
           />
 
@@ -109,48 +122,21 @@ export default function DevotionalDisplay({ devotional, section }: DevotionalDis
           </div>
         </div>
 
-        {/* Interactive Elements */}
-        <div className={`rounded-2xl shadow-xl p-8 ${
-          section === 'children'
-            ? 'bg-white'
-            : 'bg-gray-900 border border-purple-500/20'
-        }`}>
-          <InteractiveElements 
-            section={section}
-            scripture={devotional.scripture}
-            title={devotional.title}
-          />
-        </div>
+        {/* Interactive Games */}
+        <InteractiveElements
+          devotional={{
+            title: devotional.title,
+            scripture: devotional.scripture,
+            content: devotional.body
+          }}
+          section={section}
+        />
 
-        {/* Prayer Request Form */}
-        <div className={`rounded-2xl shadow-xl p-8 ${
-          section === 'children'
-            ? 'bg-white'
-            : 'bg-gray-900 border border-purple-500/20'
-        }`}>
+        {/* Interactive Forms */}
+        <div className="grid md:grid-cols-3 gap-6">
           <PrayerRequestForm section={section} />
-        </div>
-
-        {/* Counsel Request Form */}
-        <div className={`rounded-2xl shadow-xl p-8 ${
-          section === 'children'
-            ? 'bg-white'
-            : 'bg-gray-900 border border-purple-500/20'
-        }`}>
           <CounselRequestForm section={section} />
-        </div>
-
-        {/* Question Form */}
-        <div className={`rounded-2xl shadow-xl p-8 ${
-          section === 'children'
-            ? 'bg-white'
-            : 'bg-gray-900 border border-purple-500/20'
-        }`}>
-          <QuestionForm 
-            section={section}
-            devotionalId={devotional.id}
-            devotionalTitle={devotional.title}
-          />
+          <QuestionForm devotionalId={devotional.id} section={section} />
         </div>
 
         {/* Share Section */}
