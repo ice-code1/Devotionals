@@ -223,15 +223,36 @@ export default function WriterDashboard() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Profile Image URL
+                  Profile Image
                 </label>
                 <input
-                  type="url"
-                  value={profileForm.profile_image}
-                  onChange={(e) => setProfileForm(prev => ({ ...prev, profile_image: e.target.value }))}
-                  className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="https://example.com/your-photo.jpg"
-                />
+                  type="file"
+                  accept="image/*"
+                  onChange={async (e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+
+                    const fileName = `${Date.now()}-${file.name}`;
+                    const { data, error } = await supabase.storage
+                      .from('media')
+                      .upload(fileName, file, { upsert: true });
+
+                    if (error) {
+                      console.error('Upload failed:', error.message);
+                      alert('Error uploading profile image.');
+                      return;
+                    }
+
+                    // Get public URL
+                    const { data: { publicUrl } } = supabase.storage
+                      .from('DevotionalImages')
+                      .getPublicUrl(fileName);
+
+                    setProfileForm(prev => ({ ...prev, profile_image: publicUrl }));
+                  }}
+                  className="w-full text-sm text-gray-300 bg-gray-700 border border-gray-600 rounded-lg cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+
               </div>
 
               <div>

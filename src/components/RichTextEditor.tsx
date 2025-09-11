@@ -1,5 +1,6 @@
 import React from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
+import { supabase } from '../lib/supabase';
 import StarterKit from '@tiptap/starter-kit';
 import { TextStyle } from '@tiptap/extension-text-style';
 import Color from '@tiptap/extension-color';
@@ -44,11 +45,40 @@ export default function RichTextEditor({ content, onChange, placeholder }: RichT
   });
 
   const addImage = () => {
-    const url = window.prompt('Enter image URL:');
-    if (url && editor) {
-      editor.chain().focus().setImage({ src: url }).run();
+  const input = document.createElement("input")
+  input.type = "file"
+  input.accept = "image/*"
+
+  input.onchange = async () => {
+    const file = input.files?.[0]
+    if (!file || !editor) return
+
+    // Generate a unique filename
+    const fileName = `${Date.now()}-${file.name}`
+
+    // Upload to Supabase bucket
+    const { data, error } = await supabase.storage
+      .from("DevotionalImages")
+      .upload(fileName, file)
+
+    if (error) {
+      console.error("Upload failed:", error.message)
+      return
     }
-  };
+
+    // Get public URL
+    const { data: publicUrlData } = supabase.storage
+      .from("DevotionalImages")
+      .getPublicUrl(fileName)
+
+    const publicUrl = publicUrlData?.publicUrl
+    if (publicUrl) {
+      editor.chain().focus().setImage({ src: publicUrl }).run()
+    }
+  }
+
+  input.click()
+}
 
   const setFontSize = (size: string) => {
     if (editor) {

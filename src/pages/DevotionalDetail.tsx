@@ -64,8 +64,28 @@ export default function DevotionalDetail() {
     );
   }
 
+
+    // Utility function
+  function extractShortKeyPoint(html: string): string {
+    if (!html) return '';
+
+    // 1. Remove all <img> tags completely
+    const noImages = html.replace(/<img[^>]*>/g, '');
+
+    // 2. Strip all remaining HTML tags
+    const textOnly = noImages.replace(/<[^>]+>/g, '');
+
+    // 3. Trim and take only the first sentence (up to the first ".")
+    const firstSentence = textOnly.split('.').map(s => s.trim()).filter(Boolean)[0];
+
+    return firstSentence ? firstSentence + '.' : '';
+  }
+
+  // Usage
+  const shortKeyPoint = extractShortKeyPoint(devotional.body);
+
   const canonicalUrl = getCanonicalUrl(devotional.slug);
-  const shortKeyPoint = devotional.body.split('.')[0] + '.';
+
   const section = devotional.section;
 
   return (
