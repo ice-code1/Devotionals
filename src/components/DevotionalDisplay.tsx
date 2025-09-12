@@ -136,7 +136,11 @@ export default function DevotionalDisplay({ devotional, section }: DevotionalDis
         <div className="grid md:grid-cols-3 gap-6">
           <PrayerRequestForm section={section} />
           <CounselRequestForm section={section} />
-          <QuestionForm devotionalId={devotional.id} section={section} />
+          <QuestionForm
+            devotionalId={devotional.id}
+            devotionalTitle={devotional.title}
+            section={section}
+          />
         </div>
 
         {/* Share Section */}

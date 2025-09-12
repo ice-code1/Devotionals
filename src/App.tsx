@@ -10,12 +10,14 @@ import Favorites from './pages/Favorites';
 import DevotionalDetail from './pages/DevotionalDetail';
 import AdminLogin from './pages/admin/Login';
 import AdminDashboard from './pages/admin/Dashboard';
+import WriterDashboard from './pages/writer/Dashboard';   // 👈 make sure you have this
 
 function App() {
   return (
     <HelmetProvider>
       <Router>
         <Routes>
+          {/* Public routes with Layout */}
           <Route path="/" element={<Layout />}>
             <Route index element={<Landing />} />
             <Route path="children" element={<Children />} />
@@ -23,9 +25,14 @@ function App() {
             <Route path="archive/:section" element={<Archive />} />
             <Route path="favorites" element={<Favorites />} />
             <Route path="devotional/:slug" element={<DevotionalDetail />} />
-            <Route path="admin/login" element={<AdminLogin />} />
-            <Route path="admin/dashboard" element={<AdminDashboard />} />
           </Route>
+
+          {/* Admin routes (no Layout) */}
+          <Route path="/admin/login" element={<AdminLogin />} />
+          <Route path="/admin/dashboard" element={<AdminDashboard />} />
+
+          {/* Writer routes (no Layout) */}
+          <Route path="/writer/dashboard" element={<WriterDashboard />} />
         </Routes>
       </Router>
     </HelmetProvider>
