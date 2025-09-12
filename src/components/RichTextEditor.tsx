@@ -9,11 +9,14 @@ import {
   Bold, 
   Italic, 
   Underline, 
-  Type, 
   Palette, 
   Image as ImageIcon,
   Undo,
-  Redo
+  Redo,
+  Pilcrow,
+  ListOrdered,
+  Quote,
+  Heading1,
 } from 'lucide-react';
 
 interface RichTextEditorProps {
@@ -128,6 +131,52 @@ export default function RichTextEditor({ content, onChange, placeholder }: RichT
           >
             <Underline className="h-4 w-4 text-gray-700" />
           </button>
+
+          {/* Ordered List */}
+        <button
+          onClick={() => editor.chain().focus().toggleOrderedList().run()}
+          className={`p-2 rounded hover:bg-gray-100 ${
+            editor.isActive("orderedList") ? "bg-gray-200" : ""
+          }`}
+          title="Ordered List"
+        >
+          <ListOrdered className="h-4 w-4 text-gray-700" />
+        </button>
+
+         {/* Heading */}
+        <button
+          onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
+          className={`p-2 rounded hover:bg-gray-100 ${
+            editor.isActive("heading", { level: 1 }) ? "bg-gray-200" : ""
+          }`}
+          title="Heading 1"
+        >
+          <Heading1 className="h-4 w-4 text-gray-700" />
+        </button>
+
+        {/* Blockquote */}
+        <button
+          onClick={() => editor.chain().focus().toggleBlockquote().run()}
+          className={`p-2 rounded hover:bg-gray-100 ${
+            editor.isActive("blockquote") ? "bg-gray-200" : ""
+          }`}
+          title="Quote"
+        >
+          <Quote className="h-4 w-4 text-gray-700" />
+        </button>
+
+          <div className="flex items-center space-x-1 border-r border-gray-200 pr-2">
+          <button
+            onClick={() => editor.chain().focus().setParagraph().run()}
+            className={`p-2 rounded hover:bg-gray-100 ${
+              editor.isActive('paragraph') ? 'bg-gray-200' : ''
+            }`}
+            title="Paragraph"
+          >
+            <Pilcrow className="h-4 w-4 text-gray-700" />
+          </button>
+        </div>
+
         </div>
 
         <div className="flex items-center space-x-1 border-r border-gray-200 pr-2">
