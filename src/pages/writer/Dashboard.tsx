@@ -453,6 +453,13 @@ export default function WriterDashboard() {
                         )}
                       </div>
                     </div>
+
+                    {/* ✅ Rich Text Body */}
+                    <div
+                      className="prose prose-sm max-w-none text-gray-300 mt-3"
+                      dangerouslySetInnerHTML={{ __html: submission.body }}
+                    />
+
                     
                     <div className="flex items-center space-x-2 mt-3">
                       <button

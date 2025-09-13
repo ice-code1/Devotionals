@@ -1,4 +1,3 @@
-import React from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import { supabase } from '../lib/supabase';
 import StarterKit from '@tiptap/starter-kit';
@@ -53,35 +52,42 @@ export default function RichTextEditor({ content, onChange, placeholder }: RichT
   input.accept = "image/*"
 
   input.onchange = async () => {
-    const file = input.files?.[0]
-    if (!file || !editor) return
+      const file = input.files?.[0]
+      if (!file || !editor) return
 
-    // Generate a unique filename
-    const fileName = `${Date.now()}-${file.name}`
+      try {
+        // Create a unique filename (timestamp + original name)
+        const fileName = `${Date.now()}-${file.name}`
 
-    // Upload to Supabase bucket
-    const { data, error } = await supabase.storage
-      .from("DevotionalImages")
-      .upload(fileName, file)
+        // Upload to Supabase storage bucket
+        const { error: uploadError } = await supabase.storage
+          .from("DevotionalImages")
+          .upload(fileName, file)
 
-    if (error) {
-      console.error("Upload failed:", error.message)
-      return
+        if (uploadError) {
+          console.error("Upload failed:", uploadError.message)
+          return
+        }
+
+        // Get the public URL
+        const { data: publicUrlData } = supabase.storage
+          .from("DevotionalImages")
+          .getPublicUrl(fileName)
+
+        const publicUrl = publicUrlData?.publicUrl
+
+        if (publicUrl) {
+          // Insert the image into the editor
+          editor.chain().focus().setImage({ src: publicUrl }).run()
+        }
+      } catch (err) {
+        console.error("Image upload error:", err)
+      }
     }
 
-    // Get public URL
-    const { data: publicUrlData } = supabase.storage
-      .from("DevotionalImages")
-      .getPublicUrl(fileName)
-
-    const publicUrl = publicUrlData?.publicUrl
-    if (publicUrl) {
-      editor.chain().focus().setImage({ src: publicUrl }).run()
-    }
+    // Trigger the file picker
+    input.click()
   }
-
-  input.click()
-}
 
   const setFontSize = (size: string) => {
     if (editor) {
