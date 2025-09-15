@@ -169,15 +169,42 @@ export default function DevotionalDetail() {
               </p>
             </div>
 
-             {/* Body */}
-          <div
-            className={`prose prose-lg max-w-none mb-8 ${
-              section === 'children'
-                ? 'prose-blue prose-headings:text-gray-800 prose-p:text-gray-700 prose-strong:text-blue-700'
-                : 'prose-invert prose-purple prose-headings:text-purple-200 prose-p:text-gray-300 prose-strong:text-purple-400'
-            }`}
-            dangerouslySetInnerHTML={{ __html: cleanBody }}
-          />
+            {/* Body */}
+            <div
+              className={`prose prose-lg max-w-none mb-8
+                ${section === 'children'
+                  ? `
+                    prose-blue 
+                    prose-headings:text-gray-800 
+                    prose-p:text-gray-700 
+                    prose-strong:text-blue-700 
+                    prose-blockquote:border-l-4 
+                    prose-blockquote:border-yellow-400 
+                    prose-blockquote:bg-yellow-50 
+                    prose-blockquote:text-gray-800 
+                    prose-blockquote:italic 
+                    prose-blockquote:px-4 
+                    prose-blockquote:py-2 
+                    prose-blockquote:rounded-r-lg
+                  `
+                  : `
+                    prose-invert prose-purple 
+                    prose-headings:text-purple-200 
+                    prose-p:text-gray-300 
+                    prose-strong:text-purple-400 
+                    prose-blockquote:border-l-4 
+                    prose-blockquote:border-purple-500 
+                    prose-blockquote:bg-purple-900/40 
+                    prose-blockquote:text-purple-200 
+                    prose-blockquote:italic 
+                    prose-blockquote:px-4 
+                    prose-blockquote:py-2 
+                    prose-blockquote:rounded-r-lg
+                  `}
+              `}
+              dangerouslySetInnerHTML={{ __html: cleanBody }}
+            />
+
 
 
 
