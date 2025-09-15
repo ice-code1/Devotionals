@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Play, Pause, Square, Volume2, Settings } from 'lucide-react';
 import { useTextToSpeech } from '../hooks/useTextToSpeech';
+import { useAnalyticsContext } from './AnalyticsProvider';
 
 interface ReadAloudButtonProps {
   text: string;
@@ -9,6 +10,7 @@ interface ReadAloudButtonProps {
 
 export default function ReadAloudButton({ text, section }: ReadAloudButtonProps) {
   const [showSettings, setShowSettings] = useState(false);
+  const { trackReadAloud } = useAnalyticsContext();
   const {
     isSupported,
     isPlaying,
@@ -29,10 +31,16 @@ export default function ReadAloudButton({ text, section }: ReadAloudButtonProps)
   }
 
   const handleToggle = () => {
+    if (isPlaying) {
+      trackReadAloud(isPaused ? 'resume' : 'pause');
+    } else {
+      trackReadAloud('start');
+    }
     toggle(text);
   };
 
   const handleStop = () => {
+    trackReadAloud('complete');
     stop();
   };
 

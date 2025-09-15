@@ -3,6 +3,7 @@ import { QRCodeCanvas } from "qrcode.react";
 import html2canvas from 'html2canvas';
 import { Download, Copy, Share2 } from 'lucide-react';
 import { format } from 'date-fns';
+import { useAnalyticsContext } from './AnalyticsProvider';
 
 interface ShareCardProps {
   title: string;
@@ -28,6 +29,7 @@ export default function ShareCard({
   slug
 }: ShareCardProps) {
   const shareCardRef = useRef<HTMLDivElement>(null);
+  const { trackDownload, trackShare, trackClick } = useAnalyticsContext();
 
   const downloadImage = async () => {
     if (!shareCardRef.current) return;
@@ -42,6 +44,7 @@ export default function ShareCard({
       const link = document.createElement('a');
       link.download = `${format(new Date(date), 'yyyy-MM-dd')}-${section}-${slug}.png`;
       link.href = canvas.toDataURL();
+      trackDownload(link.download, slug);
       link.click();
     } catch (error) {
       console.error('Error generating image:', error);
@@ -51,6 +54,7 @@ export default function ShareCard({
   const copyLink = async () => {
     try {
       await navigator.clipboard.writeText(canonicalUrl);
+      trackShare('copy-link', slug);
       // You could add a toast notification here
     } catch (error) {
       console.error('Error copying link:', error);
@@ -60,6 +64,7 @@ export default function ShareCard({
   const shareContent = async () => {
     if (navigator.share) {
       try {
+        trackShare('native-share', slug);
         await navigator.share({
           title: title,
           text: `${shortKeyPoint}\n\n${scripture}`,
@@ -69,6 +74,7 @@ export default function ShareCard({
         console.error('Error sharing:', error);
       }
     } else {
+      trackShare('fallback-copy', slug);
       copyLink();
     }
   };
@@ -148,7 +154,7 @@ export default function ShareCard({
               {shortUrl}
             </div>
             <div className="bg-white p-2 rounded-lg">
-              <QRCodeCanvas value={canonicalUrl} size={128} />
+              <QRCodeCanvas value={canonicalUrl} size={48} />
             </div>
           </div>
         </div>
@@ -158,6 +164,7 @@ export default function ShareCard({
       <div className="flex flex-wrap gap-3 justify-center">
         <button
           onClick={downloadImage}
+          onClickCapture={() => trackClick('download-png', `devotional-${slug}`)}
           className="flex items-center space-x-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors"
         >
           <Download className="h-4 w-4" />
@@ -166,6 +173,7 @@ export default function ShareCard({
         
         <button
           onClick={copyLink}
+          onClickCapture={() => trackClick('copy-link', `devotional-${slug}`)}
           className="flex items-center space-x-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
         >
           <Copy className="h-4 w-4" />
@@ -174,6 +182,7 @@ export default function ShareCard({
         
         <button
           onClick={shareContent}
+          onClickCapture={() => trackClick('share-content', `devotional-${slug}`)}
           className="flex items-center space-x-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium transition-colors"
         >
           <Share2 className="h-4 w-4" />

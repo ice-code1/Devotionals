@@ -1,6 +1,7 @@
 import React from 'react';
 import { Heart } from 'lucide-react';
 import { useFavorites } from '../hooks/useFavorites';
+import { useAnalyticsContext } from './AnalyticsProvider';
 
 interface FavoriteButtonProps {
   devotional: {
@@ -15,9 +16,12 @@ interface FavoriteButtonProps {
 
 export default function FavoriteButton({ devotional, section }: FavoriteButtonProps) {
   const { isFavorite, toggleFavorite } = useFavorites();
+  const { trackFavorite } = useAnalyticsContext();
   const isLiked = isFavorite(devotional.id);
 
   const handleToggle = () => {
+    const action = isLiked ? 'remove' : 'add';
+    trackFavorite(action, devotional.id);
     toggleFavorite(devotional);
   };
 

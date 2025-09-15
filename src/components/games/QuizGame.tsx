@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { CheckCircle, XCircle } from 'lucide-react';
+import { useAnalyticsContext } from '../AnalyticsProvider';
 
 interface QuizGameProps {
   devotional: {
@@ -18,7 +19,11 @@ export default function QuizGame({ devotional, section, onComplete, onClose }: Q
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [showResult, setShowResult] = useState(false);
   const [isCompleted, setIsCompleted] = useState(false);
+  const { trackGamePlay, trackGameComplete } = useAnalyticsContext();
 
+  React.useEffect(() => {
+    trackGamePlay('Quiz Time');
+  }, [trackGamePlay]);
   const questions = [
     {
       question: `What is the main theme of "${devotional.title}"?`,
@@ -52,6 +57,7 @@ export default function QuizGame({ devotional, section, onComplete, onClose }: Q
         setShowResult(false);
       } else {
         setIsCompleted(true);
+        trackGameComplete('Quiz Time', score + (answerIndex === questions[currentQuestion].correct ? 1 : 0));
         onComplete();
       }
     }, 2000);

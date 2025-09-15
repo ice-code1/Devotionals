@@ -3,6 +3,7 @@ import { Navigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { supabase, Devotional, ModeratorCard } from '../../lib/supabase';
 import { generateSlug, createUniqueSlug, getCanonicalUrl } from '../../utils/slug';
+import { Link } from "react-router-dom";
 import { format } from 'date-fns';
 import { 
   Plus, 
@@ -14,6 +15,7 @@ import {
   Calendar,
   User,
   Save,
+  BarChart3,
   Eye,
   Download,
   Search,
@@ -326,8 +328,16 @@ export default function AdminDashboard() {
               <Book className="h-8 w-8 text-purple-400" />
               <h1 className="text-2xl font-bold">Admin Dashboard</h1>
             </div>
-            
+
             <div className="flex items-center space-x-4">
+
+              <Link
+                to="/admin/analytics"
+                className="flex items-center space-x-2 px-3 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg text-sm font-medium transition-colors"
+              >
+                <BarChart3 className="h-4 w-4" />
+                <span>Analytics</span>
+              </Link>
               <span className="text-sm text-gray-300">
                 Welcome, {user.email}
               </span>
