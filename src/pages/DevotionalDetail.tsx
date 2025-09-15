@@ -70,6 +70,14 @@ export default function DevotionalDetail() {
 
   const canonicalUrl = getCanonicalUrl(devotional.slug);
   const plainTextBody = DOMPurify.sanitize(devotional.body, { ALLOWED_TAGS: [] });
+  const cleanBody = DOMPurify.sanitize(devotional.body, {
+                      ALLOWED_TAGS: [
+                        'p', 'br', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+                        'blockquote', 'strong', 'em', 'u', 'ol', 'ul', 'li',
+                        'span', 'div', 'img', 'a'
+                      ],
+                      ALLOWED_ATTR: ['href', 'src', 'alt', 'title', 'target', 'rel', 'class', 'style']
+                    });
   const shortKeyPoint = plainTextBody.split('.')[0] + '.';
   const section = devotional.section;
   const fullText = `${devotional.title}. ${devotional.scripture}. ${plainTextBody}`;
@@ -161,15 +169,16 @@ export default function DevotionalDetail() {
               </p>
             </div>
 
-            {/* Body */}
-            <div
-              className={`prose prose-lg max-w-none mb-8 ${
-                section === 'children'
-                  ? 'text-gray-700'
-                  : 'text-gray-300 prose-invert'
-              }`}
-              dangerouslySetInnerHTML={{ __html: devotional.body }}
-            />
+             {/* Body */}
+          <div
+            className={`prose prose-lg max-w-none mb-8 ${
+              section === 'children'
+                ? 'prose-blue prose-headings:text-gray-800 prose-p:text-gray-700 prose-strong:text-blue-700'
+                : 'prose-invert prose-purple prose-headings:text-purple-200 prose-p:text-gray-300 prose-strong:text-purple-400'
+            }`}
+            dangerouslySetInnerHTML={{ __html: cleanBody }}
+          />
+
 
 
             {/* Author */}

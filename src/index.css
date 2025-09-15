@@ -27,3 +27,24 @@
       box-shadow: 0 4px 10px rgba(0,0,0,0.15); /* optional: soft shadow */
     }
 
+.ProseMirror blockquote {
+  border-left: 4px solid #d1d5db; /* Tailwind gray-300 */
+  padding-left: 1rem;
+  margin-left: 0;
+  color: #374151; /* Tailwind gray-700 */
+  font-style: italic;
+}
+
+
+.ProseMirror ol {
+  list-style-type: decimal;
+  margin-left: 1.5rem;
+  padding-left: 1rem;
+}
+.ProseMirror h1 {
+  font-size: 1.875rem; /* Tailwind text-3xl */
+  font-weight: bold;
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+}
+
