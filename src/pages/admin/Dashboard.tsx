@@ -19,6 +19,7 @@ import {
   BarChart3,
   Eye,
   Download,
+  PenTool,
   Search,
   Filter,
   CheckCircle,
@@ -329,32 +330,18 @@ export default function AdminDashboard() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             
-            {/* Left: Dashboard + user info + sign out */}
+            {/* Left: Dashboard + sign out */}
             <div className="flex items-center space-x-4">
-              <div className="flex items-center space-x-2">
-                <Book className="h-8 w-8 text-purple-400" />
-                <h1 className="text-2xl font-bold">Admin Dashboard</h1>
-              </div>
-              
-              {/* User info under Admin Dashboard */}
-              <div className="flex flex-col ml-4">
-                {user?.email && (() => {
-                  const [name, domain] = user.email.split("@");
+              <div className="flex flex-col space-y-2">
+                <div className="flex items-center space-x-2">
+                  <Book className="h-8 w-8 text-purple-400" />
+                  <h1 className="text-2xl font-bold">Admin Dashboard</h1>
+                </div>
 
-                  // If name part is less than 3 chars, show all of it then add *
-                  let visiblePart = name.length >= 3 ? name.slice(0, 3) : name;
-                  let masked = visiblePart + "***@" + domain;
-
-                  return (
-                    <span className="text-sm text-gray-300">
-                      Welcome, {masked}
-                    </span>
-                  );
-                })()}
-
+                {/* Sign out button directly under Admin Dashboard */}
                 <button
                   onClick={() => signOut()}
-                  className="flex items-center space-x-2 px-2 py-1 mt-1 bg-red-600 hover:bg-red-700 rounded-lg text-xs font-medium transition-colors w-fit"
+                  className="flex items-center space-x-2 px-2 py-1 bg-red-600 hover:bg-red-700 rounded-lg text-xs font-medium transition-colors w-fit"
                 >
                   <LogOut className="h-4 w-4" />
                   <span>Sign Out</span>
@@ -362,20 +349,32 @@ export default function AdminDashboard() {
               </div>
             </div>
 
-            {/* Right: Writer link */}
-            <div>
+            {/* Right: User info + Writer link */}
+            <div className="flex flex-col items-start">
+              {user?.email && (() => {
+                const [name, domain] = user.email.split("@");
+                let visiblePart = name.length >= 3 ? name.slice(0, 3) : name;
+                let masked = visiblePart + "***@" + domain;
+
+                return (
+                  <span className="text-sm text-gray-300 mb-2">
+                    Welcome, {masked}
+                  </span>
+                );
+              })()}
+
               <Link
                 to="/writer/dashboard"
                 className="flex items-center space-x-2 px-3 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg text-sm font-medium transition-colors"
               >
-                <BarChart3 className="h-4 w-4" />
+                <PenTool className="h-4 w-4" />
                 <span>Writer</span>
               </Link>
             </div>
-
           </div>
         </div>
       </header>
+
 
 
 
