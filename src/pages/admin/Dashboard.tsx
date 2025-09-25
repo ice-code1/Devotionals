@@ -328,10 +328,11 @@ export default function AdminDashboard() {
      {/* Header */}
       <header className="bg-gray-800 border-b border-gray-700">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
+          {/* Use py instead of fixed height */}
+          <div className="flex justify-between items-start py-6">
             
             {/* Left: Dashboard + sign out */}
-            <div className="flex items-center space-x-4">
+            <div className="flex items-start space-x-4">
               <div className="flex flex-col space-y-2">
                 <div className="flex items-center space-x-2">
                   <Book className="h-8 w-8 text-purple-400" />
@@ -350,14 +351,14 @@ export default function AdminDashboard() {
             </div>
 
             {/* Right: User info + Writer link */}
-            <div className="flex flex-col items-start">
+            <div className="flex flex-col items-start space-y-2">
               {user?.email && (() => {
                 const [name, domain] = user.email.split("@");
                 let visiblePart = name.length >= 3 ? name.slice(0, 3) : name;
                 let masked = visiblePart + "***@" + domain;
 
                 return (
-                  <span className="text-sm text-gray-300 mb-2">
+                  <span className="text-sm text-gray-300">
                     Welcome, {masked}
                   </span>
                 );
