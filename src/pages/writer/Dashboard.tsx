@@ -291,43 +291,65 @@ export default function WriterDashboard() {
 
   return (
     <div className="min-h-screen w-full bg-gray-900 text-white">
-      {/* Header */}
+     {/* Header */}
       <header className="bg-gray-800 border-b border-gray-700">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
+          <div className="flex justify-between items-center py-4">
+            
+            {/* Left: Dashboard title */}
             <div className="flex items-center space-x-2">
               <PenTool className="h-8 w-8 text-blue-400" />
               <h1 className="text-2xl font-bold">Writer Dashboard</h1>
             </div>
-            
-            <div className="flex items-center space-x-4">
+
+            {/* Right: Writer info + actions */}
+            <div className="flex items-center space-x-6">
+              
+              {/* Profile Image + Masked Name */}
               <div className="flex items-center space-x-3">
                 {writer.profile_image && (
                   <img
                     src={writer.profile_image}
                     alt={writer.name}
-                    className="w-8 h-8 rounded-full"
+                    className="w-10 h-10 rounded-full border-2 border-gray-600"
                   />
                 )}
-                <span className="text-sm text-gray-300">Welcome, {writer.name}</span>
+
+                {/* Masked Name */}
+                <span className="text-base text-gray-300 font-medium">
+                  {(() => {
+                    if (!writer?.name) return "";
+                    const parts = writer.name.trim().split(" ");
+                    const firstName = parts[0] || "";
+                    const lastName = parts[parts.length - 1] || "";
+                    return `${firstName.charAt(0).toUpperCase()}.${lastName}`;
+                  })()}
+                </span>
               </div>
-              <button
-                onClick={() => setShowProfileForm(true)}
-                className="px-3 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg text-sm font-medium transition-colors"
-              >
-                Edit Profile
-              </button>
-              <button
-                onClick={() => signOut()}
-                className="flex items-center space-x-2 px-3 py-2 bg-red-600 hover:bg-red-700 rounded-lg text-sm font-medium transition-colors"
-              >
-                <LogOut className="h-4 w-4" />
-                <span>Sign Out</span>
-              </button>
+
+              {/* Edit Profile + Sign Out stacked */}
+              <div className="flex flex-col space-y-2">
+                <button
+                  onClick={() => setShowProfileForm(true)}
+                  className="px-3 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg text-sm font-medium transition-colors"
+                >
+                  Edit Profile
+                </button>
+                <button
+                  onClick={() => signOut()}
+                  className="flex items-center space-x-2 px-3 py-2 bg-red-600 hover:bg-red-700 rounded-lg text-sm font-medium transition-colors"
+                >
+                  <LogOut className="h-4 w-4" />
+                  <span>Sign Out</span>
+                </button>
+              </div>
+
             </div>
           </div>
         </div>
       </header>
+
+
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 overflow-x-hidden">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

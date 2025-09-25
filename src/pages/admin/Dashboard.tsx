@@ -324,17 +324,46 @@ export default function AdminDashboard() {
 
   return (
     <div className="min-h-screen bg-gray-900 text-white">
-      {/* Header */}
+     {/* Header */}
       <header className="bg-gray-800 border-b border-gray-700">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-2">
-              <Book className="h-8 w-8 text-purple-400" />
-              <h1 className="text-2xl font-bold">Admin Dashboard</h1>
+            
+            {/* Left: Dashboard + user info + sign out */}
+            <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-2">
+                <Book className="h-8 w-8 text-purple-400" />
+                <h1 className="text-2xl font-bold">Admin Dashboard</h1>
+              </div>
+              
+              {/* User info under Admin Dashboard */}
+              <div className="flex flex-col ml-4">
+                {user?.email && (() => {
+                  const [name, domain] = user.email.split("@");
+
+                  // If name part is less than 3 chars, show all of it then add *
+                  let visiblePart = name.length >= 3 ? name.slice(0, 3) : name;
+                  let masked = visiblePart + "***@" + domain;
+
+                  return (
+                    <span className="text-sm text-gray-300">
+                      Welcome, {masked}
+                    </span>
+                  );
+                })()}
+
+                <button
+                  onClick={() => signOut()}
+                  className="flex items-center space-x-2 px-2 py-1 mt-1 bg-red-600 hover:bg-red-700 rounded-lg text-xs font-medium transition-colors w-fit"
+                >
+                  <LogOut className="h-4 w-4" />
+                  <span>Sign Out</span>
+                </button>
+              </div>
             </div>
 
-            <div className="flex items-center space-x-4">
-
+            {/* Right: Writer link */}
+            <div>
               <Link
                 to="/writer/dashboard"
                 className="flex items-center space-x-2 px-3 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg text-sm font-medium transition-colors"
@@ -342,69 +371,72 @@ export default function AdminDashboard() {
                 <BarChart3 className="h-4 w-4" />
                 <span>Writer</span>
               </Link>
-              <span className="text-sm text-gray-300">
-                Welcome, {user.email}
-              </span>
-              <button
-                onClick={() => signOut()}
-                className="flex items-center space-x-2 px-3 py-2 bg-red-600 hover:bg-red-700 rounded-lg text-sm font-medium transition-colors"
-              >
-                <LogOut className="h-4 w-4" />
-                <span>Sign Out</span>
-              </button>
             </div>
+
           </div>
         </div>
       </header>
 
+
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Navigation Tabs */}
+       {/* Navigation Tabs */}
         <div className="flex space-x-4 mb-8">
-          <button
-            onClick={() => setActiveTab('devotionals')}
-            className={`flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-colors ${
-              activeTab === 'devotionals'
-                ? 'bg-purple-600 text-white'
-                : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-            }`}
-          >
-            <Book className="h-5 w-5" />
-            <span>Devotionals</span>
-          </button>
-          <button
-            onClick={() => setActiveTab('moderator-cards')}
-            className={`flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-colors ${
-              activeTab === 'moderator-cards'
-                ? 'bg-purple-600 text-white'
-                : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-            }`}
-          >
-            <Users className="h-5 w-5" />
-            <span>Moderator Cards</span>
-          </button>
-          <button
-            onClick={() => setActiveTab('submissions')}
-            className={`flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-colors ${
-              activeTab === 'submissions'
-                ? 'bg-purple-600 text-white'
-                : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-            }`}
-          >
-            <Eye className="h-5 w-5" />
-            <span>Submissions</span>
-          </button>
-          <button
-            onClick={() => setActiveTab('data')}
-            className={`flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-colors ${
-              activeTab === 'data'
-                ? 'bg-purple-600 text-white'
-                : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-            }`}
-          >
-            <Download className="h-5 w-5" />
-            <span>User Data</span>
-          </button>
+          {/* Devotionals with Submissions */}
+          <div className="flex flex-col">
+            <button
+              onClick={() => setActiveTab('devotionals')}
+              className={`flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-colors ${
+                activeTab === 'devotionals'
+                  ? 'bg-purple-600 text-white'
+                  : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+              }`}
+            >
+              <Book className="h-5 w-5" />
+              <span>Devotionals</span>
+            </button>
+            {/* Submissions under Devotionals */}
+            <button
+              onClick={() => setActiveTab('submissions')}
+              className={`ml-6 mt-1 flex items-center space-x-2 px-3 py-1 rounded-md text-sm transition-colors ${
+                activeTab === 'submissions'
+                  ? 'bg-purple-500 text-white'
+                  : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+              }`}
+            >
+              <Eye className="h-4 w-4" />
+              <span>Submissions</span>
+            </button>
+          </div>
+
+          {/* Moderator Cards with User Data */}
+          <div className="flex flex-col">
+            <button
+              onClick={() => setActiveTab('moderator-cards')}
+              className={`flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-colors ${
+                activeTab === 'moderator-cards'
+                  ? 'bg-purple-600 text-white'
+                  : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+              }`}
+            >
+              <Users className="h-5 w-5" />
+              <span>Moderator Cards</span>
+            </button>
+            {/* User Data under Moderator Cards */}
+            <button
+              onClick={() => setActiveTab('data')}
+              className={`ml-6 mt-1 flex items-center space-x-2 px-3 py-1 rounded-md text-sm transition-colors ${
+                activeTab === 'data'
+                  ? 'bg-purple-500 text-white'
+                  : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+              }`}
+            >
+              <Download className="h-4 w-4" />
+              <span>User Data</span>
+            </button>
+          </div>
         </div>
+
 
         {activeTab === 'devotionals' && (
           <div className="grid lg:grid-cols-2 gap-8">
