@@ -5,6 +5,7 @@ import { supabase, Devotional, ModeratorCard } from '../../lib/supabase';
 import { generateSlug, createUniqueSlug, getCanonicalUrl } from '../../utils/slug';
 import { Link } from "react-router-dom";
 import { format } from 'date-fns';
+import PreviewModal from "./PreviewModal";
 import { 
   Plus, 
   LogOut, 
@@ -40,6 +41,9 @@ export default function AdminDashboard() {
   const [prayerRequests, setPrayerRequests] = useState<any[]>([]);
   const [counselRequests, setCounselRequests] = useState<any[]>([]);
   const [questions, setQuestions] = useState<any[]>([]);
+  
+  //Preview modal state
+  const [selectedSubmission, setSelectedSubmission] = useState(null);
   
   // Devotional form state
   const [devotionalForm, setDevotionalForm] = useState({
@@ -332,11 +336,11 @@ export default function AdminDashboard() {
             <div className="flex items-center space-x-4">
 
               <Link
-                to="/admin/analytics"
+                to="/writer/dashboard"
                 className="flex items-center space-x-2 px-3 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg text-sm font-medium transition-colors"
               >
                 <BarChart3 className="h-4 w-4" />
-                <span>Analytics</span>
+                <span>Writer</span>
               </Link>
               <span className="text-sm text-gray-300">
                 Welcome, {user.email}
@@ -514,7 +518,7 @@ export default function AdminDashboard() {
                   </div>
                 </div>
 
-                <button
+                {/* <button
                   type="submit"
                   disabled={isSubmittingDevotional}
                   className="w-full bg-green-600 hover:bg-green-700 disabled:bg-green-800 disabled:cursor-not-allowed text-white font-semibold py-3 px-4 rounded-lg transition-colors flex items-center justify-center space-x-2"
@@ -527,7 +531,7 @@ export default function AdminDashboard() {
                       <span>Create Devotional</span>
                     </>
                   )}
-                </button>
+                </button> */}
               </form>
             </div>
 
@@ -698,17 +702,22 @@ export default function AdminDashboard() {
                           <XCircle className="h-4 w-4" />
                           <span>Reject</span>
                         </button>
-                        <a
-                          href={`/review/${submission.review_link}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
+                        <button
+                          onClick={() => setSelectedSubmission(submission)}
                           className="flex items-center space-x-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-sm font-medium"
                         >
-                          <ExternalLink className="h-4 w-4" />
                           <span>Preview</span>
-                        </a>
+                        </button>
                       </div>
                     )}
+
+                    {/* Render modal if selected */}
+                      {selectedSubmission && (
+                        <PreviewModal
+                          submission={selectedSubmission}
+                          onClose={() => setSelectedSubmission(null)}
+                        />
+                      )}
 
                     {submission.admin_notes && (
                       <div className="mt-4 p-3 bg-gray-600 rounded">
